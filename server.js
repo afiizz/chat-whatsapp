@@ -52,14 +52,29 @@ app.post('/upload', upload.single('file'), (req, res) => {
 });
 
 // Comunicación en tiempo real con WebSockets
+// Guardamos el estado de cada socket
+const userStates = {}; // { socketId: { username, status: 'online' | 'background' } }
+
 io.on('connection', (socket) => {
   socket.on('user_connected', (username) => {
     socket.username = username;
+    userStates[socket.id] = { username, status: 'online' };
+
+    broadcastStatus();
+
     io.emit('chat_message', {
       user: 'Sistema',
       text: `🟢 ${username} se ha unido al chat.`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
+  });
+
+  // Escuchar cuando el usuario cambia de pestaña o vuelve a ella
+  socket.on('update_focus', (status) => {
+    if (userStates[socket.id]) {
+      userStates[socket.id].status = status; // 'online' o 'background'
+      broadcastStatus();
+    }
   });
 
   socket.on('send_message', (data) => {
@@ -70,6 +85,26 @@ io.on('connection', (socket) => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
   });
+
+  // Al cerrar la pestaña
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      const username = socket.username;
+      delete userStates[socket.id];
+      
+      broadcastStatus();
+
+      io.emit('chat_message', {
+        user: 'Sistema',
+        text: `🔴 ${username} se ha desconectado.`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+    }
+  });
+
+  function broadcastStatus() {
+    io.emit('status_change', userStates);
+  }
 });
 
 const PORT = process.env.PORT || 3000;

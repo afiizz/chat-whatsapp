@@ -119,3 +119,37 @@ function escapeHTML(str) {
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
+
+// Detectar si la pestaña pasa a segundo plano o se vuelve a enfocar
+document.addEventListener('visibilitychange', sendFocusStatus);
+window.addEventListener('focus', sendFocusStatus);
+window.addEventListener('blur', sendFocusStatus);
+
+function sendFocusStatus() {
+  const isFocused = !document.hidden && document.hasFocus();
+  socket.emit('update_focus', isFocused ? 'online' : 'background');
+}
+
+// Actualizar el texto del encabezado según el estado de los demás usuarios
+socket.on('status_change', (userStates) => {
+  const statusElement = document.getElementById('user-status');
+  
+  // Filtrar otros usuarios distintos al actual
+  const otherUsers = Object.values(userStates).filter(u => u.username !== currentUser);
+
+  if (otherUsers.length === 0) {
+    statusElement.textContent = 'Desconectado';
+    statusElement.style.color = '#8696a0'; // Gris
+  } else {
+    // Si alguno está activo en la pestaña
+    const isOtherOnline = otherUsers.some(u => u.status === 'online');
+    
+    if (isOtherOnline) {
+      statusElement.textContent = 'En línea';
+      statusElement.style.color = '#00a884'; // Verde WhatsApp
+    } else {
+      statusElement.textContent = 'En otra pestaña';
+      statusElement.style.color = '#e5a93c'; // Naranja/Amarillo
+    }
+  }
+});
