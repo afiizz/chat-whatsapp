@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Web</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+</head>
+<body>
+
+  <!-- PANTALLA DE LOGIN -->
+  <div id="login-container">
+    <div class="login-card">
+      <div class="whatsapp-logo">💬</div>
+      <h2>WhatsApp Web Privado</h2>
+      <p>Introduce tu usuario y contraseña para continuar</p>
+      <input type="text" id="username" placeholder="Nombre de usuario" autocomplete="off">
+      <input type="password" id="password" placeholder="Contraseña">
+      <button id="btn-login">Iniciar Sesión</button>
+      <p id="error-msg" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- INTERFAZ DEL CHAT ESTILO WHATSAPP -->
+  <div id="chat-app" class="hidden">
+    <div class="chat-container">
+      
+      <!-- ENCABEZADO -->
+      <header class="chat-header">
+        <div class="avatar">💬</div>
+        <div class="user-info">
+          <span class="chat-title">Chat Privado 2 Ord</span>
+          <span class="chat-subtitle" id="user-status">En línea</span>
+        </div>
+      </header>
+
+      <!-- ÁREA DE MENSAJES -->
+      <main id="messages-container" class="messages-container"></main>
+
+      <!-- SELECTOR DE EMOJIS -->
+      <emoji-picker id="emoji-picker" class="emoji-picker hidden"></emoji-picker>
+
+      <!-- BARRA INFERIOR DE ENTRADA -->
+      <footer class="chat-footer">
+        <button id="btn-emoji" title="Emojis">😀</button>
+        
+        <input type="file" id="file-input" class="hidden">
+        <button id="btn-attach" title="Adjuntar archivo">📎</button>
+        
+        <input type="text" id="message-input" placeholder="Escribe un mensaje" autocomplete="off">
+        <button id="btn-send" title="Enviar">▶</button>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
