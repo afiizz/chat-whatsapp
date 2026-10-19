@@ -16,13 +16,14 @@ const errorMsg = document.getElementById('error-msg');
 // LOGIN
 document.getElementById('btn-login').addEventListener('click', doLogin);
 document.getElementById('user-nickname').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('room-password').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
 
 async function doLogin() {
   const password = document.getElementById('room-password').value.trim();
   const nickname = document.getElementById('user-nickname').value.trim();
 
-  if (!password || !nickname) {
-    errorMsg.textContent = 'Introduce la contraseña y tu nombre';
+  if (!nickname || !password) {
+    errorMsg.textContent = 'Introduce tu nombre y la contraseña';
     errorMsg.classList.remove('hidden');
     return;
   }
@@ -47,7 +48,7 @@ async function doLogin() {
       errorMsg.classList.remove('hidden');
     }
   } catch (err) {
-    errorMsg.textContent = 'Error de conexión';
+    errorMsg.textContent = 'Error de conexión con el servidor';
     errorMsg.classList.remove('hidden');
   }
 }
@@ -104,7 +105,7 @@ emojiPicker.addEventListener('emoji-click', event => {
   messageInput.value += event.detail.unicode;
 });
 
-// BUSCADOR GIFS TENOR
+// BUSCADOR GIFS
 gifSearch.addEventListener('input', (e) => {
   const query = e.target.value.trim();
   fetchGifs(query || 'trending');
@@ -198,6 +199,12 @@ socket.on('status_change', (userStates) => {
   }
 });
 
+// COMPROBAR SI UN TEXTO CONTIENE ÚNICAMENTE EMOJIS
+function isOnlyEmoji(str) {
+  const emojiRegex = /^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$/g;
+  return emojiRegex.test(str.trim());
+}
+
 // RECIBIR MENSAJES
 socket.on('chat_message', (msg) => {
   const div = document.createElement('div');
@@ -211,7 +218,15 @@ socket.on('chat_message', (msg) => {
     div.className = `msg ${isMe ? 'my-msg' : ''}`;
 
     let body = `<div class="msg-author">${msg.user}</div>`;
-    if (msg.text) body += `<span>${escapeHTML(msg.text)}</span>`;
+    
+    if (msg.text) {
+      if (isOnlyEmoji(msg.text)) {
+        body += `<span class="big-emoji">${escapeHTML(msg.text)}</span>`;
+      } else {
+        body += `<span>${escapeHTML(msg.text)}</span>`;
+      }
+    }
+
     if (msg.sticker) body += `<br><img src="${msg.sticker}" class="sticker-img" />`;
     if (msg.gif) body += `<br><img src="${msg.gif}" class="gif-img" />`;
     if (msg.file) {
@@ -221,7 +236,6 @@ socket.on('chat_message', (msg) => {
 
     body += `<div class="reactions-bar" id="reactions-${msg.id}"></div>`;
     
-    // Ticks para mis propios mensajes
     const ticksHTML = isMe ? `<span class="ticks ${msg.read ? 'read' : ''}">✓✓</span>` : '';
     body += `<span class="msg-time">${msg.time}${ticksHTML}</span>`;
     body += `<div class="reaction-trigger">➕</div>`;
@@ -249,7 +263,7 @@ socket.on('chat_message', (msg) => {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
-// MARCAR MENSAJES COMO LEÍDOS (DOBLE CHECK AZUL)
+// MARCAR COMO LEÍDO
 socket.on('messages_read_by_user', () => {
   const allMyTicks = document.querySelectorAll('.my-msg .ticks');
   allMyTicks.forEach(tick => tick.classList.add('read'));

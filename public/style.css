@@ -328,3 +328,11 @@ html, body {
   color: #53bdeb; /* Azul WhatsApp */
 }
 
+/* EMOJI GIGANTE */
+.big-emoji {
+  font-size: 48px;
+  line-height: 1.2;
+  display: inline-block;
+  margin: 4px 0;
+}
+

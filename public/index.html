@@ -14,10 +14,11 @@
     <div class="login-card">
       <div class="whatsapp-logo">⚡</div>
       <h2>Chat Privado Ultra</h2>
-      <p>Introduce la contraseña del chat y tu apodo</p>
+      <p>Introduce tu nombre y la contraseña de acceso</p>
       
-      <input type="password" id="room-password" placeholder="Contraseña de acceso">
+      <!-- NOMBRE ARRIBA DE LA CONTRASEÑA -->
       <input type="text" id="user-nickname" placeholder="Tu nombre o apodo" autocomplete="off">
+      <input type="password" id="room-password" placeholder="Contraseña de acceso">
       
       <button id="btn-login">Entrar al Chat</button>
       <p id="error-msg" class="error hidden"></p>
@@ -73,7 +74,7 @@
         <input type="file" id="file-input" class="hidden">
         <button id="btn-attach" title="Adjuntar archivo">📎</button>
         
-        <input type="text" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+        <input type="text" id="message-input" placeholder="Escribe un mensaje o menciona a @ia..." autocomplete="off">
         <button id="btn-send" title="Enviar">▶</button>
       </footer>
 
@@ -84,3 +85,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
