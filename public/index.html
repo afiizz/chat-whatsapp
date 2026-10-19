@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>WhatsApp Web Ultra</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="extras.css">
   <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </head>
 <body>
@@ -16,10 +15,10 @@
       <div class="whatsapp-logo">⚡</div>
       <h2>Chat Privado Ultra</h2>
       <p>Introduce tu nombre y la contraseña de acceso</p>
-
+      
       <input type="text" id="user-nickname" placeholder="Tu nombre o apodo" autocomplete="off">
       <input type="password" id="room-password" placeholder="Contraseña de acceso">
-
+      
       <button id="btn-login">Entrar al Chat</button>
       <p id="error-msg" class="error hidden"></p>
     </div>
@@ -28,10 +27,10 @@
   <!-- INTERFAZ FULL SCREEN -->
   <div id="chat-app" class="hidden">
     <div class="chat-container">
-
-      <!-- ENCABEZADO -->
+      
+      <!-- ENCABEZADO CLICABLE -->
       <header class="chat-header">
-        <div class="header-left">
+        <div class="header-left clickable-header" id="header-info" title="Ver participantes conectados">
           <div class="avatar">⚡</div>
           <div class="user-info">
             <span class="chat-title">Chat Privado</span>
@@ -44,34 +43,24 @@
       <!-- ÁREA DE MENSAJES -->
       <main id="messages-container" class="messages-container"></main>
 
-      <!-- BARRA "ESCRIBIENDO..." -->
-      <div id="typing-bar" class="typing-bar hidden">
-        <div class="typing-dots"><span></span><span></span><span></span></div>
-        <span id="typing-text"></span>
-      </div>
-
-      <!-- PANELS DESPLEGABLES -->
+      <!-- PANELS DESPLEGABLES MULTIMEDIA -->
       <emoji-picker id="emoji-picker" class="emoji-picker hidden"></emoji-picker>
 
       <div id="sticker-picker" class="sticker-picker hidden">
-        <div class="picker-tabs">
-          <button class="picker-tab active" data-tab="memes">😂 Memes</button>
-          <button class="picker-tab" data-tab="emojis">😀 Emojis</button>
-        </div>
-
-        <div id="sticker-tab-memes" class="sticker-tab">
-          <input type="text" id="sticker-search" placeholder="Buscar stickers (ej: jajaja, bro, no...)" autocomplete="off">
-          <div id="sticker-chips" class="chips"></div>
-          <div id="sticker-meme-grid" class="meme-grid"></div>
-        </div>
-
-        <div id="sticker-tab-emojis" class="sticker-tab hidden">
-          <div class="sticker-grid" id="sticker-emoji-grid"></div>
+        <div class="sticker-grid">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f970/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f44d/512.webp" class="sticker-item" alt="Sticker">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp" class="sticker-item" alt="Sticker">
         </div>
       </div>
 
       <div id="gif-picker" class="gif-picker hidden">
-        <input type="text" id="gif-search" placeholder="Buscar GIF..." autocomplete="off">
+        <input type="text" id="gif-search" placeholder="Buscar GIF...">
         <div id="gif-grid" class="gif-grid"></div>
       </div>
 
@@ -84,20 +73,30 @@
         <button id="btn-cancel-reply" class="btn-close-reply">✕</button>
       </div>
 
-
       <!-- BARRA INFERIOR DE CONTROLES -->
       <footer class="chat-footer">
         <button id="btn-emoji" title="Emojis">😀</button>
         <button id="btn-sticker" title="Stickers">🏷️</button>
         <button id="btn-gif" title="GIFs">👾</button>
-
+        
         <input type="file" id="file-input" class="hidden">
         <button id="btn-attach" title="Adjuntar archivo">📎</button>
-
+        
         <input type="text" id="message-input" placeholder="Escribe un mensaje o menciona a @ia..." autocomplete="off">
         <button id="btn-send" title="Enviar">▶</button>
       </footer>
 
+    </div>
+  </div>
+
+  <!-- MODAL DE PARTICIPANTES CONECTADOS -->
+  <div id="users-modal" class="users-modal hidden">
+    <div class="users-modal-content">
+      <div class="users-modal-header">
+        <h3>Participantes del Chat</h3>
+        <button id="btn-close-users-modal" class="btn-close-modal">✕</button>
+      </div>
+      <ul id="users-list" class="users-list"></ul>
     </div>
   </div>
 

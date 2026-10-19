@@ -2,6 +2,7 @@ const socket = io();
 let currentUser = '';
 let typingTimeout = null;
 let activeReply = null;
+let currentConnectedUsers = {};
 
 const loginContainer = document.getElementById('login-container');
 const chatApp = document.getElementById('chat-app');
@@ -19,6 +20,11 @@ const replyPreview = document.getElementById('reply-preview');
 const replyPreviewAuthor = document.getElementById('reply-preview-author');
 const replyPreviewText = document.getElementById('reply-preview-text');
 const btnCancelReply = document.getElementById('btn-cancel-reply');
+
+const headerInfo = document.getElementById('header-info');
+const usersModal = document.getElementById('users-modal');
+const btnCloseUsersModal = document.getElementById('btn-close-users-modal');
+const usersList = document.getElementById('users-list');
 
 // LOGIN
 document.getElementById('btn-login').addEventListener('click', doLogin);
@@ -60,7 +66,54 @@ async function doLogin() {
   }
 }
 
-// NOTIFICACIONES
+// MODAL PARTICIPANTES
+if (headerInfo) {
+  headerInfo.addEventListener('click', () => {
+    renderUsersModalList();
+    usersModal.classList.remove('hidden');
+  });
+}
+
+if (btnCloseUsersModal) {
+  btnCloseUsersModal.addEventListener('click', () => {
+    usersModal.classList.add('hidden');
+  });
+}
+
+usersModal.addEventListener('click', (e) => {
+  if (e.target === usersModal) {
+    usersModal.classList.add('hidden');
+  }
+});
+
+function renderUsersModalList() {
+  usersList.innerHTML = '';
+  const usersArray = Object.values(currentConnectedUsers);
+
+  if (usersArray.length === 0) {
+    usersList.innerHTML = '<li class="user-item">No hay usuarios activos</li>';
+    return;
+  }
+
+  usersArray.forEach(user => {
+    const li = document.createElement('li');
+    li.className = 'user-item';
+
+    const isMe = user.username === currentUser;
+    const isOnline = user.status === 'online';
+
+    li.innerHTML = `
+      <span class="user-item-name">${escapeHTML(user.username)} ${isMe ? '(Tú)' : ''}</span>
+      <span class="user-badge ${isOnline ? 'badge-online' : 'badge-background'}">
+        ${isOnline ? 'En línea' : 'En otra pestaña'}
+      </span>
+    `;
+
+    usersList.appendChild(li);
+  });
+}
+
+// NOTIFICACIONES Y SONIDO
 document.getElementById('btn-notify').addEventListener('click', requestNotificationPermission);
 
 function requestNotificationPermission() {
@@ -69,7 +122,6 @@ function requestNotificationPermission() {
   }
 }
 
-// SONIDO POP
 function playPopSound() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
@@ -85,7 +137,7 @@ function playPopSound() {
   osc.stop(ctx.currentTime + 0.08);
 }
 
-// TOGGLES
+// TOGGLES MULTIMEDIA
 document.getElementById('btn-emoji').addEventListener('click', () => {
   closePanels();
   emojiPicker.classList.toggle('hidden');
@@ -197,7 +249,7 @@ function setReplyTarget(msg) {
   messageInput.focus();
 }
 
-// ENVIAR
+// ENVIAR MENSAJE
 document.getElementById('btn-send').addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
@@ -218,7 +270,7 @@ function sendMessage() {
   }
 }
 
-// RECIBIR ESTADO ESCRIBIENDO
+// ESCUCHA DE EVENTOS
 socket.on('user_typing', (data) => {
   const statusElement = document.getElementById('user-status');
   statusElement.textContent = `${data.username} está escribiendo...`;
@@ -227,7 +279,6 @@ socket.on('user_typing', (data) => {
 
 socket.on('user_stop_typing', () => {});
 
-// PRESENCIA
 document.addEventListener('visibilitychange', sendFocusStatus);
 window.addEventListener('focus', sendFocusStatus);
 window.addEventListener('blur', sendFocusStatus);
@@ -239,21 +290,26 @@ function sendFocusStatus() {
 }
 
 socket.on('status_change', (userStates) => {
+  currentConnectedUsers = userStates;
   const statusElement = document.getElementById('user-status');
   const otherUsers = Object.values(userStates).filter(u => u.username !== currentUser);
 
   if (otherUsers.length === 0) {
-    statusElement.textContent = 'Desconectado';
+    statusElement.textContent = 'Solo tú en el chat';
     statusElement.style.color = '#8696a0';
   } else {
     const isOtherOnline = otherUsers.some(u => u.status === 'online');
     if (isOtherOnline) {
-      statusElement.textContent = 'En línea';
+      statusElement.textContent = 'En línea (clic para ver)';
       statusElement.style.color = '#00a884';
     } else {
-      statusElement.textContent = 'En otra pestaña';
+      statusElement.textContent = 'En otra pestaña (clic para ver)';
       statusElement.style.color = '#e5a93c';
     }
+  }
+
+  if (!usersModal.classList.contains('hidden')) {
+    renderUsersModalList();
   }
 });
 
@@ -262,7 +318,7 @@ function isOnlyEmoji(str) {
   return emojiRegex.test(str.trim());
 }
 
-// RECIBIR MENSAJES
+// RECIBIR MENSAJES Y RENDERIZAR
 socket.on('chat_message', (msg) => {
   const div = document.createElement('div');
   div.dataset.id = msg.id;
@@ -347,7 +403,7 @@ socket.on('chat_message', (msg) => {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
-// ACTUALIZAR IA
+// ACTUALIZACIÓN DE IA
 socket.on('update_ai_message', (data) => {
   const msgDiv = document.querySelector(`.msg[data-id="${data.id}"]`);
   if (msgDiv) {
@@ -359,7 +415,7 @@ socket.on('update_ai_message', (data) => {
   }
 });
 
-// NAVEGACIÓN Y ILUMINACIÓN DE CITA
+// SCROLL Y HIGHLIGHT
 function scrollToMessage(msgId) {
   const target = document.getElementById(`msg-${msgId}`);
   if (target) {
@@ -370,7 +426,7 @@ function scrollToMessage(msgId) {
   }
 }
 
-// DOBLE CHECK
+// DOBLE CHECK AZUL
 socket.on('messages_read_by_user', () => {
   const allMyTicks = document.querySelectorAll('.my-msg .ticks');
   allMyTicks.forEach(tick => tick.classList.add('read'));
@@ -410,5 +466,4 @@ function escapeHTML(str) {
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
-
 
