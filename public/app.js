@@ -1,5 +1,6 @@
 const socket = io();
 let currentUser = '';
+let typingTimeout = null;
 
 const loginContainer = document.getElementById('login-container');
 const chatApp = document.getElementById('chat-app');
@@ -155,18 +156,40 @@ fileInput.addEventListener('change', async () => {
   fileInput.value = '';
 });
 
-// ENVIAR
+// EVENTO DE ESCRIBIENDO
+messageInput.addEventListener('input', () => {
+  socket.emit('typing');
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    socket.emit('stop_typing');
+  }, 1500);
+});
+
+// ENVIAR MENSAJE
 document.getElementById('btn-send').addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
 function sendMessage() {
   const text = messageInput.value.trim();
   if (text) {
+    socket.emit('stop_typing');
+    clearTimeout(typingTimeout);
     socket.emit('send_message', { text });
     messageInput.value = '';
     closePanels();
   }
 }
+
+// ESCUCHA DE ESTADO "ESCRIBIENDO..."
+socket.on('user_typing', (data) => {
+  const statusElement = document.getElementById('user-status');
+  statusElement.textContent = `${data.username} está escribiendo...`;
+  statusElement.style.color = '#00a884';
+});
+
+socket.on('user_stop_typing', () => {
+  // El estado volverá a actualizarse al enviar el mensaje o con el status general
+});
 
 // VISIBILIDAD DE PESTAÑA
 document.addEventListener('visibilitychange', sendFocusStatus);
@@ -199,7 +222,6 @@ socket.on('status_change', (userStates) => {
   }
 });
 
-// COMPROBAR SI UN TEXTO CONTIENE ÚNICAMENTE EMOJIS
 function isOnlyEmoji(str) {
   const emojiRegex = /^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])+$/g;
   return emojiRegex.test(str.trim());
@@ -219,11 +241,13 @@ socket.on('chat_message', (msg) => {
 
     let body = `<div class="msg-author">${msg.user}</div>`;
     
-    if (msg.text) {
+    if (msg.isLoading) {
+      body += `<div class="msg-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    } else if (msg.text) {
       if (isOnlyEmoji(msg.text)) {
-        body += `<span class="big-emoji">${escapeHTML(msg.text)}</span>`;
+        body += `<div class="msg-content"><span class="big-emoji">${escapeHTML(msg.text)}</span></div>`;
       } else {
-        body += `<span>${escapeHTML(msg.text)}</span>`;
+        body += `<div class="msg-content"><span>${escapeHTML(msg.text)}</span></div>`;
       }
     }
 
@@ -248,7 +272,7 @@ socket.on('chat_message', (msg) => {
       showReactionMenu(div, msg.id);
     });
 
-    if (!isMe) {
+    if (!isMe && !msg.isLoading) {
       playPopSound();
       if (document.hidden && Notification.permission === 'granted') {
         new Notification(`Nuevo mensaje de ${msg.user}`, {
@@ -261,6 +285,18 @@ socket.on('chat_message', (msg) => {
 
   messagesContainer.appendChild(div);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// ACTUALIZACIÓN DINÁMICA DE LA RESPUESTA DE LA IA
+socket.on('update_ai_message', (data) => {
+  const msgDiv = document.querySelector(`.msg[data-id="${data.id}"]`);
+  if (msgDiv) {
+    const contentContainer = msgDiv.querySelector('.msg-content');
+    if (contentContainer) {
+      contentContainer.innerHTML = `<span>${escapeHTML(data.text)}</span>`;
+    }
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
 });
 
 // MARCAR COMO LEÍDO
