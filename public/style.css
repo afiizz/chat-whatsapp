@@ -277,3 +277,40 @@ body {
   color: #00a884;
 }
 
+
+/* SELECTOR DE STICKERS */
+.sticker-picker {
+  position: absolute;
+  bottom: 65px;
+  left: 50px;
+  background-color: #202c33;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.sticker-item {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.sticker-item:hover {
+  transform: scale(1.15);
+}
+
+/* MOSTRAR STICKER EN EL CHAT */
+.sticker-img {
+  width: 120px;
+  height: 120px;
+  margin-top: 5px;
+}
+

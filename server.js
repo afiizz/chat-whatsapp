@@ -9,13 +9,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Asegurar que existe la carpeta de subidas
+// Asegurar carpeta de subidas
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configuración de almacenamiento para archivos adjuntos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads/'),
   filename: (req, file, cb) => {
@@ -25,25 +24,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Usuarios permitidos (puedes cambiar usuarios/contraseñas aquí)
-const USERS = {
-  'usuario1': 'clave123',
-  'usuario2': 'clave456'
-};
+// Contraseña única/global para entrar al chat
+const CHAT_PASSWORD = 'chat123';
 
 app.use(express.json());
 app.use(express.static('public'));
 
-// Endpoint de Login
+// Endpoint de Validación
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  if (USERS[username] && USERS[username] === password) {
-    return res.json({ success: true, username });
+  const { password, nickname } = req.body;
+  if (password === CHAT_PASSWORD && nickname && nickname.trim() !== '') {
+    return res.json({ success: true, nickname: nickname.trim() });
   }
-  res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+  res.status(401).json({ success: false, message: 'Contraseña incorrecta o nombre no válido' });
 });
 
-// Endpoint para subir archivos (imágenes/documentos)
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).send('No se subió archivo');
   const fileUrl = `/uploads/${req.file.filename}`;
@@ -51,28 +46,26 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.json({ url: fileUrl, originalName: req.file.originalname, isImage });
 });
 
-// Comunicación en tiempo real con WebSockets
-// Guardamos el estado de cada socket
-const userStates = {}; // { socketId: { username, status: 'online' | 'background' } }
+// Guardamos los sockets activos
+const userStates = {};
 
 io.on('connection', (socket) => {
-  socket.on('user_connected', (username) => {
-    socket.username = username;
-    userStates[socket.id] = { username, status: 'online' };
+  socket.on('user_connected', (nickname) => {
+    socket.username = nickname;
+    userStates[socket.id] = { username: nickname, status: 'online' };
 
     broadcastStatus();
 
     io.emit('chat_message', {
       user: 'Sistema',
-      text: `🟢 ${username} se ha unido al chat.`,
+      text: `🟢 ${nickname} se ha unido al chat.`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
   });
 
-  // Escuchar cuando el usuario cambia de pestaña o vuelve a ella
   socket.on('update_focus', (status) => {
     if (userStates[socket.id]) {
-      userStates[socket.id].status = status; // 'online' o 'background'
+      userStates[socket.id].status = status;
       broadcastStatus();
     }
   });
@@ -82,21 +75,21 @@ io.on('connection', (socket) => {
       user: socket.username,
       text: data.text,
       file: data.file,
+      sticker: data.sticker,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
   });
 
-  // Al cerrar la pestaña
   socket.on('disconnect', () => {
     if (socket.username) {
-      const username = socket.username;
+      const name = socket.username;
       delete userStates[socket.id];
       
       broadcastStatus();
 
       io.emit('chat_message', {
         user: 'Sistema',
-        text: `🔴 ${username} se ha desconectado.`,
+        text: `🔴 ${name} se ha desconectado.`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
     }

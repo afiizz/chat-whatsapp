@@ -6,32 +6,38 @@ const chatApp = document.getElementById('chat-app');
 const messagesContainer = document.getElementById('messages-container');
 const messageInput = document.getElementById('message-input');
 const emojiPicker = document.getElementById('emoji-picker');
+const stickerPicker = document.getElementById('sticker-picker');
 const fileInput = document.getElementById('file-input');
 const errorMsg = document.getElementById('error-msg');
 
 // LOGIN
 document.getElementById('btn-login').addEventListener('click', doLogin);
-document.getElementById('password').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('user-nickname').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
 
 async function doLogin() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const password = document.getElementById('room-password').value.trim();
+  const nickname = document.getElementById('user-nickname').value.trim();
 
-  if (!username || !password) return;
+  if (!password || !nickname) {
+    errorMsg.textContent = 'Introduce la contraseña y tu nombre';
+    errorMsg.classList.remove('hidden');
+    return;
+  }
 
   try {
     const res = await fetch('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ password, nickname })
     });
 
     const data = await res.json();
     if (data.success) {
-      currentUser = username;
+      currentUser = data.nickname;
       loginContainer.classList.add('hidden');
       chatApp.classList.remove('hidden');
       socket.emit('user_connected', currentUser);
+      sendFocusStatus();
     } else {
       errorMsg.textContent = data.message;
       errorMsg.classList.remove('hidden');
@@ -42,13 +48,28 @@ async function doLogin() {
   }
 }
 
-// TOGGLE EMOJIS
+// TOGGLE EMOJIS & STICKERS
 document.getElementById('btn-emoji').addEventListener('click', () => {
+  stickerPicker.classList.add('hidden');
   emojiPicker.classList.toggle('hidden');
+});
+
+document.getElementById('btn-sticker').addEventListener('click', () => {
+  emojiPicker.classList.add('hidden');
+  stickerPicker.classList.toggle('hidden');
 });
 
 emojiPicker.addEventListener('emoji-click', event => {
   messageInput.value += event.detail.unicode;
+});
+
+// SELECCIONAR Y ENVIAR STICKER
+document.querySelectorAll('.sticker-item').forEach(img => {
+  img.addEventListener('click', () => {
+    const stickerUrl = img.src;
+    socket.emit('send_message', { sticker: stickerUrl });
+    stickerPicker.classList.add('hidden');
+  });
 });
 
 // ADJUNTAR ARCHIVO
@@ -78,10 +99,42 @@ function sendMessage() {
     socket.emit('send_message', { text });
     messageInput.value = '';
     emojiPicker.classList.add('hidden');
+    stickerPicker.classList.add('hidden');
   }
 }
 
-// RECIBIR MENSAJES EN TIEMPO REAL
+// DETECTAR ESTADO DE LA PESTAÑA
+document.addEventListener('visibilitychange', sendFocusStatus);
+window.addEventListener('focus', sendFocusStatus);
+window.addEventListener('blur', sendFocusStatus);
+
+function sendFocusStatus() {
+  if (!currentUser) return;
+  const isFocused = !document.hidden && document.hasFocus();
+  socket.emit('update_focus', isFocused ? 'online' : 'background');
+}
+
+// CAMBIO DE ESTADO
+socket.on('status_change', (userStates) => {
+  const statusElement = document.getElementById('user-status');
+  const otherUsers = Object.values(userStates).filter(u => u.username !== currentUser);
+
+  if (otherUsers.length === 0) {
+    statusElement.textContent = 'Desconectado';
+    statusElement.style.color = '#8696a0';
+  } else {
+    const isOtherOnline = otherUsers.some(u => u.status === 'online');
+    if (isOtherOnline) {
+      statusElement.textContent = 'En línea';
+      statusElement.style.color = '#00a884';
+    } else {
+      statusElement.textContent = 'En otra pestaña';
+      statusElement.style.color = '#e5a93c';
+    }
+  }
+});
+
+// RECIBIR MENSAJES
 socket.on('chat_message', (msg) => {
   const div = document.createElement('div');
 
@@ -96,6 +149,10 @@ socket.on('chat_message', (msg) => {
 
     if (msg.text) {
       body += `<span>${escapeHTML(msg.text)}</span>`;
+    }
+
+    if (msg.sticker) {
+      body += `<br><img src="${msg.sticker}" class="sticker-img" />`;
     }
 
     if (msg.file) {
@@ -119,37 +176,3 @@ function escapeHTML(str) {
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
-
-// Detectar si la pestaña pasa a segundo plano o se vuelve a enfocar
-document.addEventListener('visibilitychange', sendFocusStatus);
-window.addEventListener('focus', sendFocusStatus);
-window.addEventListener('blur', sendFocusStatus);
-
-function sendFocusStatus() {
-  const isFocused = !document.hidden && document.hasFocus();
-  socket.emit('update_focus', isFocused ? 'online' : 'background');
-}
-
-// Actualizar el texto del encabezado según el estado de los demás usuarios
-socket.on('status_change', (userStates) => {
-  const statusElement = document.getElementById('user-status');
-  
-  // Filtrar otros usuarios distintos al actual
-  const otherUsers = Object.values(userStates).filter(u => u.username !== currentUser);
-
-  if (otherUsers.length === 0) {
-    statusElement.textContent = 'Desconectado';
-    statusElement.style.color = '#8696a0'; // Gris
-  } else {
-    // Si alguno está activo en la pestaña
-    const isOtherOnline = otherUsers.some(u => u.status === 'online');
-    
-    if (isOtherOnline) {
-      statusElement.textContent = 'En línea';
-      statusElement.style.color = '#00a884'; // Verde WhatsApp
-    } else {
-      statusElement.textContent = 'En otra pestaña';
-      statusElement.style.color = '#e5a93c'; // Naranja/Amarillo
-    }
-  }
-});

@@ -9,15 +9,17 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE LOGIN -->
+  <!-- PANTALLA DE LOGIN UNIFICADA -->
   <div id="login-container">
     <div class="login-card">
       <div class="whatsapp-logo">💬</div>
-      <h2>WhatsApp Web Privado</h2>
-      <p>Introduce tu usuario y contraseña para continuar</p>
-      <input type="text" id="username" placeholder="Nombre de usuario" autocomplete="off">
-      <input type="password" id="password" placeholder="Contraseña">
-      <button id="btn-login">Iniciar Sesión</button>
+      <h2>Acceso al Chat Privado</h2>
+      <p>Introduce la contraseña del chat y tu nombre para entrar</p>
+      
+      <input type="password" id="room-password" placeholder="Contraseña de acceso">
+      <input type="text" id="user-nickname" placeholder="Tu nombre o apodo" autocomplete="off">
+      
+      <button id="btn-login">Entrar al Chat</button>
       <p id="error-msg" class="error hidden"></p>
     </div>
   </div>
@@ -30,20 +32,34 @@
       <header class="chat-header">
         <div class="avatar">💬</div>
         <div class="user-info">
-          <span class="chat-title">Chat Privado 2 Ord</span>
-          <span class="chat-subtitle" id="user-status">En línea</span>
+          <span class="chat-title">Chat Privado</span>
+          <span class="chat-subtitle" id="user-status">Desconectado</span>
         </div>
       </header>
 
       <!-- ÁREA DE MENSAJES -->
       <main id="messages-container" class="messages-container"></main>
 
-      <!-- SELECTOR DE EMOJIS -->
+      <!-- PANELS DE EMOJIS Y STICKERS -->
       <emoji-picker id="emoji-picker" class="emoji-picker hidden"></emoji-picker>
+
+      <div id="sticker-picker" class="sticker-picker hidden">
+        <div class="sticker-grid">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.webp" class="sticker-item" alt="Sticker 1">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.webp" class="sticker-item" alt="Sticker 2">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp" class="sticker-item" alt="Sticker 3">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp" class="sticker-item" alt="Sticker 4">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.webp" class="sticker-item" alt="Sticker 5">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f970/512.webp" class="sticker-item" alt="Sticker 6">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f44d/512.webp" class="sticker-item" alt="Sticker 7">
+          <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp" class="sticker-item" alt="Sticker 8">
+        </div>
+      </div>
 
       <!-- BARRA INFERIOR DE ENTRADA -->
       <footer class="chat-footer">
         <button id="btn-emoji" title="Emojis">😀</button>
+        <button id="btn-sticker" title="Stickers">🏷️</button>
         
         <input type="file" id="file-input" class="hidden">
         <button id="btn-attach" title="Adjuntar archivo">📎</button>
