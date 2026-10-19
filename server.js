@@ -9,11 +9,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Asegurar carpeta de subidas
 const uploadDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads/'),
@@ -24,13 +21,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Contraseña única/global para entrar al chat
 const CHAT_PASSWORD = 'chat123';
 
 app.use(express.json());
 app.use(express.static('public'));
 
-// Endpoint de Validación
 app.post('/login', (req, res) => {
   const { password, nickname } = req.body;
   if (password === CHAT_PASSWORD && nickname && nickname.trim() !== '') {
@@ -46,7 +41,6 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.json({ url: fileUrl, originalName: req.file.originalname, isImage });
 });
 
-// Guardamos los sockets activos
 const userStates = {};
 
 io.on('connection', (socket) => {
@@ -57,6 +51,7 @@ io.on('connection', (socket) => {
     broadcastStatus();
 
     io.emit('chat_message', {
+      id: Date.now() + Math.random().toString(),
       user: 'Sistema',
       text: `🟢 ${nickname} se ha unido al chat.`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -67,16 +62,35 @@ io.on('connection', (socket) => {
     if (userStates[socket.id]) {
       userStates[socket.id].status = status;
       broadcastStatus();
+
+      // Si se pone online y enfoca la pantalla, marcamos como leídos los mensajes de los demás
+      if (status === 'online') {
+        socket.broadcast.emit('messages_read_by_user', { reader: socket.username });
+      }
     }
   });
 
   socket.on('send_message', (data) => {
+    // Verificar si hay algún otro usuario activo/online para poner el check inicial
+    const otherOnline = Object.values(userStates).some(u => u.username !== socket.username && u.status === 'online');
+
     io.emit('chat_message', {
+      id: Date.now() + Math.random().toString(),
       user: socket.username,
       text: data.text,
       file: data.file,
       sticker: data.sticker,
+      gif: data.gif,
+      read: otherOnline, // Si el otro ya está en la pestaña, nace leído
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+  });
+
+  socket.on('add_reaction', (data) => {
+    io.emit('message_reaction', {
+      messageId: data.messageId,
+      emoji: data.emoji,
+      user: socket.username
     });
   });
 
@@ -88,6 +102,7 @@ io.on('connection', (socket) => {
       broadcastStatus();
 
       io.emit('chat_message', {
+        id: Date.now() + Math.random().toString(),
         user: 'Sistema',
         text: `🔴 ${name} se ha desconectado.`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -102,3 +117,4 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`🚀 Servidor ejecutándose en el puerto ${PORT}`));
+

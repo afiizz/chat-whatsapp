@@ -5,93 +5,93 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-body {
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   background-color: #0c1317;
   color: #e9edef;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .hidden {
   display: none !important;
 }
 
-/* --- LOGIN --- */
+/* CUSTOM SCROLLBAR MODERNA */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 168, 132, 0.5);
+}
+
+/* LOGIN */
 #login-container {
-  width: 100%;
-  max-width: 400px;
-  padding: 20px;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #111b21 0%, #0a0f12 100%);
 }
 
 .login-card {
-  background-color: #111b21;
-  padding: 30px;
-  border-radius: 12px;
+  background-color: #1f2c34;
+  padding: 35px 30px;
+  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  width: 90%;
+  max-width: 380px;
 }
 
-.whatsapp-logo {
-  font-size: 50px;
-  margin-bottom: 10px;
-}
-
-.login-card h2 {
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: #00a884;
-}
-
-.login-card p {
-  font-size: 13px;
-  color: #8696a0;
-  margin-bottom: 20px;
-}
+.whatsapp-logo { font-size: 55px; margin-bottom: 10px; }
+.login-card h2 { font-size: 22px; color: #00a884; margin-bottom: 8px; }
+.login-card p { font-size: 13px; color: #8696a0; margin-bottom: 20px; }
 
 .login-card input {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  background-color: #2a3942;
+  padding: 13px;
+  margin-bottom: 12px;
+  background-color: #111b21;
   border: 1px solid #2a3942;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #fff;
   font-size: 14px;
 }
 
-.login-card input:focus {
-  outline: none;
-  border-color: #00a884;
-}
+.login-card input:focus { outline: none; border-color: #00a884; }
 
 .login-card button {
   width: 100%;
-  padding: 12px;
+  padding: 13px;
   background-color: #00a884;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #111b21;
   font-weight: bold;
   cursor: pointer;
   font-size: 15px;
+  margin-top: 5px;
 }
 
-.login-card button:hover {
-  background-color: #06cf9c;
-}
+.login-card button:hover { background-color: #06cf9c; }
+.error { color: #ea868f; margin-top: 12px; font-size: 13px; }
 
-.error {
-  color: #ea868f;
-  margin-top: 10px;
-}
-
-/* --- CHAT APP --- */
+/* CHAT APP FULLSCREEN */
 #chat-app {
-  width: 100%;
-  max-width: 900px;
-  height: 90vh;
+  width: 100vw;
+  height: 100vh;
   display: flex;
 }
 
@@ -102,25 +102,26 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 
 /* HEADER */
 .chat-header {
-  height: 60px;
+  height: 65px;
   background-color: #202c33;
-  padding: 10px 16px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   border-bottom: 1px solid #222d34;
+  z-index: 10;
 }
 
+.header-left { display: flex; align-items: center; }
+
 .avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #00a884;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #00a884, #25d366);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -129,45 +130,47 @@ body {
   margin-right: 15px;
 }
 
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
+.user-info { display: flex; flex-direction: column; }
+.chat-title { font-weight: 600; font-size: 16px; }
+.chat-subtitle { font-size: 12px; color: #8696a0; }
 
-.chat-title {
-  font-weight: 600;
-  font-size: 16px;
+.notify-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.7;
 }
+.notify-btn:hover { opacity: 1; }
 
-.chat-subtitle {
-  font-size: 12px;
-  color: #8696a0;
-}
-
-/* MESSAGES CONTAINER */
+/* MENSAJES */
 .messages-container {
   flex: 1;
-  padding: 20px;
+  padding: 20px 10%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background-image: radial-gradient(#1f2c34 1px, transparent 0);
-  background-size: 16px 16px;
+  gap: 12px;
+  background-image: radial-gradient(#1a262f 1.2px, transparent 0);
+  background-size: 20px 20px;
 }
 
-/* MENSAJES ESTILO WHATSAPP */
+@media (max-width: 768px) {
+  .messages-container { padding: 15px; }
+}
+
 .msg {
   max-width: 65%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  line-height: 1.45;
   position: relative;
   word-wrap: break-word;
   background-color: #202c33;
   align-self: flex-start;
   color: #e9edef;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .msg.my-msg {
@@ -177,69 +180,114 @@ body {
 
 .msg.system-msg {
   align-self: center;
-  background-color: #182229;
+  background-color: rgba(24, 34, 41, 0.85);
   color: #8696a0;
   font-size: 12px;
-  border-radius: 6px;
-  padding: 5px 10px;
+  border-radius: 20px;
+  padding: 6px 16px;
+  backdrop-filter: blur(5px);
 }
 
-.msg-author {
-  font-weight: 600;
+.msg-author { font-weight: 600; font-size: 12px; color: #e5828f; margin-bottom: 3px; }
+.my-msg .msg-author { display: none; }
+.msg-time { font-size: 10px; color: #8696a0; float: right; margin-top: 6px; margin-left: 10px; }
+
+/* REACCIONES EN MENSAJES */
+.reactions-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.reaction-badge {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 2px 6px;
   font-size: 12px;
-  color: #e5828f;
-  margin-bottom: 2px;
+  cursor: pointer;
 }
 
-.my-msg .msg-author {
-  display: none;
-}
-
-.msg-time {
-  font-size: 10px;
-  color: #8696a0;
-  float: right;
-  margin-top: 4px;
-  margin-left: 10px;
-}
-
-/* IMÁGENES Y ARCHIVOS */
-.preview-img {
-  max-width: 100%;
-  border-radius: 6px;
-  margin-top: 5px;
-}
-
-.file-link {
-  color: #53bdeb;
-  text-decoration: none;
-  display: inline-block;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-.file-link:hover {
-  text-decoration: underline;
-}
-
-/* EMOJI PICKER */
-.emoji-picker {
+.reaction-trigger {
   position: absolute;
-  bottom: 65px;
-  left: 10px;
-  z-index: 100;
-  --num-columns: 8;
-  --category-emoji-size: 1.1rem;
+  top: -10px;
+  right: -10px;
+  background: #2a3942;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
 }
 
-/* FOOTER / CONTROLES */
-.chat-footer {
-  height: 62px;
+.msg:hover .reaction-trigger { display: flex; }
+
+.reaction-menu {
+  position: absolute;
+  top: -35px;
+  right: 0;
+  background: #202c33;
+  border-radius: 20px;
+  padding: 4px 8px;
+  display: flex;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  z-index: 20;
+}
+
+.reaction-menu span { cursor: pointer; transition: transform 0.15s; }
+.reaction-menu span:hover { transform: scale(1.3); }
+
+/* MEDIA (GIFS, STICKERS, IMÁGENES) */
+.preview-img, .gif-img { max-width: 100%; border-radius: 8px; margin-top: 6px; }
+.sticker-img { width: 130px; height: 130px; margin-top: 5px; }
+.file-link { color: #53bdeb; text-decoration: none; font-weight: 500; }
+
+/* GIF & STICKER PICKERS */
+.sticker-picker, .gif-picker, .emoji-picker {
+  position: absolute;
+  bottom: 70px;
+  left: 20px;
   background-color: #202c33;
-  padding: 10px 16px;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+.sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.sticker-item { width: 65px; height: 65px; cursor: pointer; transition: transform 0.2s; }
+.sticker-item:hover { transform: scale(1.15); }
+
+.gif-picker { width: 320px; height: 300px; display: flex; flex-direction: column; }
+.gif-picker input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #2a3942;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.gif-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.gif-grid img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; cursor: pointer; }
+
+/* FOOTER CONTROLES */
+.chat-footer {
+  height: 68px;
+  background-color: #202c33;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .chat-footer button {
@@ -248,69 +296,35 @@ body {
   color: #8696a0;
   font-size: 22px;
   cursor: pointer;
-  padding: 5px;
+  padding: 6px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.chat-footer button:hover {
-  color: #aebac1;
-}
+.chat-footer button:hover { color: #aebac1; background-color: rgba(255,255,255,0.05); }
 
 .chat-footer input[type="text"] {
   flex: 1;
   background-color: #2a3942;
   border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 10px;
   color: #e9edef;
   font-size: 15px;
 }
 
-.chat-footer input[type="text"]:focus {
-  outline: none;
+.chat-footer input[type="text"]:focus { outline: none; }
+#btn-send { color: #00a884; font-size: 18px; }
+
+/* TICKS DE ESTADO (VISTO / ENTREGADO) */
+.ticks {
+  font-size: 11px;
+  margin-left: 4px;
+  color: #8696a0; /* Gris por defecto */
+  letter-spacing: -2px;
+  font-weight: bold;
 }
 
-#btn-send {
-  color: #00a884;
-}
-
-
-/* SELECTOR DE STICKERS */
-.sticker-picker {
-  position: absolute;
-  bottom: 65px;
-  left: 50px;
-  background-color: #202c33;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  z-index: 100;
-}
-
-.sticker-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.sticker-item {
-  width: 60px;
-  height: 60px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.sticker-item:hover {
-  transform: scale(1.15);
-}
-
-/* MOSTRAR STICKER EN EL CHAT */
-.sticker-img {
-  width: 120px;
-  height: 120px;
-  margin-top: 5px;
+.ticks.read {
+  color: #53bdeb; /* Azul WhatsApp */
 }
 
